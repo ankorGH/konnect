@@ -1,0 +1,13 @@
+{
+    "interval": "5m",
+    "messages": [],
+    "day": "2021-12-14T00:00:00Z",
+    "startHour": "1",
+    "apiBaseURL": "https://api.nalosolutions.com/bulksms?",
+    "username": "",
+    "password": "",
+    "type": "0",
+    "delivery": "1",
+    "source": "Phaya",
+    "receiver": "<phone-number>"
+}
