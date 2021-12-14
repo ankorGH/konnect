@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ankorgh/konnect/internal/nalo"
+	"github.com/ankorgh/konnect/internal/nalo/v1"
 )
 
 type Config struct {
@@ -14,6 +14,7 @@ type Config struct {
 	Day       time.Time
 	StartHour int
 	Sender    string
+	Source    string
 }
 
 type Konnect struct {
@@ -56,7 +57,7 @@ func (k *Konnect) Run() error {
 		}
 		select {
 		case <-ticker.C:
-			if err := k.notifier.SendSMS(k.cfg.Messages[msgIdx], k.cfg.Sender); err != nil {
+			if err := k.notifier.SendSMS(k.cfg.Messages[msgIdx], k.cfg.Sender, k.cfg.Source); err != nil {
 				return err
 			}
 			msgIdx++

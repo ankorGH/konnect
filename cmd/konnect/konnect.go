@@ -6,7 +6,7 @@ import (
 
 	"github.com/ankorgh/konnect/internal/config"
 	"github.com/ankorgh/konnect/internal/konnect"
-	"github.com/ankorgh/konnect/internal/nalo"
+	"github.com/ankorgh/konnect/internal/nalo/v1"
 )
 
 func main() {
@@ -23,15 +23,7 @@ func run() error {
 	}
 
 	// setup nalo sms api
-	naloCfg := nalo.Config{
-		ApiBaseURL: cfg.GetString("apiBaseURL"),
-		Username:   cfg.GetString("username"),
-		Password:   cfg.GetString("password"),
-		Type:       cfg.GetString("type"),
-		Delivery:   cfg.GetString("delivery"),
-		Source:     cfg.GetString("source"),
-	}
-	notifier := nalo.New(ctx, &naloCfg)
+	notifier := nalo.New(ctx, cfg.GetString("username"), cfg.GetString("password"), nil).WithDelivery(nalo.Delivery_Active).WithType(nalo.MessageType_PlainTextISO)
 
 	// setup konnect
 	kCfg := &konnect.Config{
@@ -40,6 +32,7 @@ func run() error {
 		Day:       cfg.GetTime("day").UTC(),
 		StartHour: cfg.GetInt("startHour"),
 		Sender:    cfg.GetString("receiver"),
+		Source:    cfg.GetString("source"),
 	}
 	konnect := konnect.New(ctx, kCfg, notifier)
 	err = konnect.Run()
