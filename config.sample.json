@@ -3,7 +3,7 @@
     "messages": [],
     "day": "2021-12-14T00:00:00Z",
     "startHour": "1",
-    "apiBaseURL": "https://api.nalosolutions.com/bulksms?",
+    "apiBaseURL": "https://api.nalosolutions.com",
     "username": "",
     "password": "",
     "type": "0",
