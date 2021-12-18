@@ -44,7 +44,7 @@ func (n *Nalo) buildSMSURL(message, destination, from string, delivery Delivery,
 	params.Set("source", from)
 	params.Set("dlr", delivery.String())
 	params.Set("type", messageType.String())
-	return fmt.Sprintf("%s/bulksms?%s", n.baseURL, params.Encode())
+	return fmt.Sprintf("%s/bulksms?%s&%s", n.baseURL, params.Encode(), n.baseParams.Encode())
 }
 
 func (n *Nalo) GetBalance() (*CreditBalanceResponse, error) {
