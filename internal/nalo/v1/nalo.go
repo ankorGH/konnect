@@ -3,6 +3,7 @@ package nalo
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -48,7 +49,27 @@ func (n *Nalo) buildURL(path, message, destination, from string) string {
 	return fmt.Sprintf("%s/%s?%s", n.baseURL, path, n.params.Encode())
 }
 
-func (n *Nalo) SendSMS(message, to, from string) (*Response, error) {
+func (n *Nalo) GetBalance() (*CreditBalanceResponse, error) {
+	url := fmt.Sprintf("%s/nalosms/credit_bal.php?%s", n.baseURL, n.params.Encode())
+	resp, err := n.client.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode/100 != 2 {
+		return nil, fmt.Errorf("request to %q failed with status '%d'", url, resp.StatusCode)
+	}
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	var creditBalance CreditBalanceResponse
+	if err := json.Unmarshal(b, &creditBalance); err != nil {
+		return nil, err
+	}
+	return &creditBalance, nil
+}
+
+func (n *Nalo) SendSMS(message, to, from string) (*SMSResponse, error) {
 	url := n.buildURL("bulksms", message, to, from)
 	resp, err := n.client.Get(url)
 	if err != nil {
@@ -64,7 +85,10 @@ func (n *Nalo) SendSMS(message, to, from string) (*Response, error) {
 	responseSplit := bytes.Split(b, []byte("|"))
 	switch string(responseSplit[0]) {
 	case "1701":
-		return NewResponse(string(responseSplit[1]), string(responseSplit[2])), nil
+		return &SMSResponse{
+			Destination: string(responseSplit[1]),
+			MessageId:   string(responseSplit[2]),
+		}, nil
 	case "1702":
 		return nil, ErrInvalidURL
 	case "1703":

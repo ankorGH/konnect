@@ -1,13 +1,11 @@
 package nalo
 
-type Response struct {
+type SMSResponse struct {
 	Destination string
 	MessageId   string
 }
 
-func NewResponse(destination, messageId string) *Response {
-	return &Response{
-		Destination: destination,
-		MessageId:   messageId,
-	}
+type CreditBalanceResponse struct {
+	Balance  float64 `json:"balance"`
+	TotalSMS int64   `json:"total_sms"`
 }
