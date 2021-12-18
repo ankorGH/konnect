@@ -10,47 +10,45 @@ import (
 	"net/url"
 )
 
-type Nalo struct {
-	ctx     context.Context
-	baseURL string
-	params  url.Values
-	client  *http.Client
+type Credentials struct {
+	Username string
+	Password string
 }
 
-func New(ctx context.Context, username, password string, client *http.Client) *Nalo {
+type Nalo struct {
+	ctx        context.Context
+	baseURL    string
+	baseParams url.Values
+	client     *http.Client
+}
+
+func New(ctx context.Context, credentials Credentials, client *http.Client) *Nalo {
 	if client == nil {
 		client = http.DefaultClient
 	}
-	params := url.Values{}
-	params.Set("username", username)
-	params.Set("password", password)
+	baseParams := url.Values{}
+	baseParams.Set("username", credentials.Username)
+	baseParams.Set("password", credentials.Password)
 	return &Nalo{
-		ctx:     ctx,
-		baseURL: "https://api.nalosolutions.com",
-		params:  params,
-		client:  client,
+		ctx:        ctx,
+		baseURL:    "https://api.nalosolutions.com",
+		baseParams: baseParams,
+		client:     client,
 	}
 }
 
-func (n *Nalo) WithDelivery(dlr Delivery) *Nalo {
-	n.params.Set("dlr", dlr.String())
-	return n
-}
-
-func (n *Nalo) WithType(stype MessageType) *Nalo {
-	n.params.Set("type", stype.String())
-	return n
-}
-
-func (n *Nalo) buildURL(path, message, destination, from string) string {
-	n.params.Set("destination", destination)
-	n.params.Set("message", message)
-	n.params.Set("source", from)
-	return fmt.Sprintf("%s/%s?%s", n.baseURL, path, n.params.Encode())
+func (n *Nalo) buildSMSURL(message, destination, from string, delivery Delivery, messageType MessageType) string {
+	params := url.Values{}
+	params.Set("destination", destination)
+	params.Set("message", message)
+	params.Set("source", from)
+	params.Set("dlr", delivery.String())
+	params.Set("type", messageType.String())
+	return fmt.Sprintf("%s/bulksms?%s", n.baseURL, params.Encode())
 }
 
 func (n *Nalo) GetBalance() (*CreditBalanceResponse, error) {
-	url := fmt.Sprintf("%s/nalosms/credit_bal.php?%s", n.baseURL, n.params.Encode())
+	url := fmt.Sprintf("%s/nalosms/credit_bal.php?%s", n.baseURL, n.baseParams.Encode())
 	resp, err := n.client.Get(url)
 	if err != nil {
 		return nil, err
@@ -69,8 +67,8 @@ func (n *Nalo) GetBalance() (*CreditBalanceResponse, error) {
 	return &creditBalance, nil
 }
 
-func (n *Nalo) SendSMS(message, to, from string) (*SMSResponse, error) {
-	url := n.buildURL("bulksms", message, to, from)
+func (n *Nalo) SendSMS(message, to, from string, delivery Delivery, messageType MessageType) (*SMSResponse, error) {
+	url := n.buildSMSURL(message, to, from, delivery, messageType)
 	resp, err := n.client.Get(url)
 	if err != nil {
 		return nil, err

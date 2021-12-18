@@ -57,7 +57,7 @@ func (k *Konnect) Run() error {
 		}
 		select {
 		case <-ticker.C:
-			_, err := k.notifier.SendSMS(k.cfg.Messages[msgIdx], k.cfg.Sender, k.cfg.Source)
+			_, err := k.notifier.SendSMS(k.cfg.Messages[msgIdx], k.cfg.Sender, k.cfg.Source, nalo.Delivery_Active, nalo.MessageType_PlainTextISO)
 			if err != nil {
 				return err
 			}

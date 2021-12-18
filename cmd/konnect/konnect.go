@@ -23,7 +23,10 @@ func run() error {
 	}
 
 	// setup nalo sms api
-	notifier := nalo.New(ctx, cfg.GetString("username"), cfg.GetString("password"), nil).WithDelivery(nalo.Delivery_Active).WithType(nalo.MessageType_PlainTextISO)
+	notifier := nalo.New(ctx, nalo.Credentials{
+		Username: cfg.GetString("username"),
+		Password: cfg.GetString("password"),
+	}, nil)
 
 	// setup konnect
 	kCfg := &konnect.Config{
